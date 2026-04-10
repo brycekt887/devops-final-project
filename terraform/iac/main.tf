@@ -1,11 +1,7 @@
-provider "aws" {
-  region = var.aws_region
-}
-
 resource "aws_security_group" "web_sg" {
   name        = "devops-final-web-sg"
   description = "Allow web traffic"
-
+ 
   ingress {
     description = "HTTP"
     from_port   = 3000
@@ -13,7 +9,7 @@ resource "aws_security_group" "web_sg" {
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
-
+ 
   ingress {
     description = "SSH"
     from_port   = 22
@@ -21,7 +17,7 @@ resource "aws_security_group" "web_sg" {
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
-
+ 
   egress {
     from_port   = 0
     to_port     = 0
@@ -29,22 +25,27 @@ resource "aws_security_group" "web_sg" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 }
-
+ 
+# Get latest Amazon Linux 2 AMI automatically
+data "aws_ssm_parameter" "amazon_linux_2" {
+  name = "/aws/service/ami-amazon-linux-latest/amzn2-ami-kernel-default-hvm-x86_64-gp2"
+}
+ 
 resource "aws_instance" "web" {
-  ami                    = var.ami_id
-  instance_type          = var.instance_type
+  ami                    = data.aws_ssm_parameter.amazon_linux_2.value
+  instance_type          = "t2.micro"
   vpc_security_group_ids = [aws_security_group.web_sg.id]
-
+ 
   user_data = <<-EOF
               #!/bin/bash
               yum update -y
               amazon-linux-extras install docker -y
               service docker start
               usermod -a -G docker ec2-user
-              docker pull ${var.docker_image}
-              docker run -d -p 3000:3000 ${var.docker_image}
+              docker pull brycekt887/devops-final-project
+              docker run -d -p 3000:3000 brycekt887/devops-final-project
               EOF
-
+ 
   tags = {
     Name = "devops-final-project"
   }
