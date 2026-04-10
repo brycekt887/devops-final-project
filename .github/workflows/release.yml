@@ -40,3 +40,27 @@ jobs:
       - name: Terraform Apply
         working-directory: ./iac
         run: terraform apply --auto-approve
+
+      - name: Get EC2 Public IP
+        id: ip
+        working-directory: ./iac
+        run: |
+          echo "ip=$(terraform output -raw public_ip)" >> $GITHUB_OUTPUT
+
+      - name: Install SSH Client
+        run: sudo apt-get install -y openssh-client
+
+      - name: Add SSH Key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.EC2_SSH_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+
+      - name: Deploy Docker Container to EC2
+        run: |
+          ssh -o StrictHostKeyChecking=no ubuntu@${{ steps.ip.outputs.ip }} "
+            sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/final-project:latest &&
+            sudo docker stop app || true &&
+            sudo docker rm app || true &&
+            sudo docker run -d -p 80:80 --name app ${{ secrets.DOCKERHUB_USERNAME }}/final-project:latest
+          "
