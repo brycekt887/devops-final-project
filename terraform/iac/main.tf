@@ -42,8 +42,8 @@ resource "aws_instance" "web" {
               amazon-linux-extras install docker -y
               service docker start
               usermod -a -G docker ec2-user
-              docker pull brycekt887/devops-final-project
-              docker run -d -p 3000:3000 brycekt887/devops-final-project
+              docker pull brycekt4384/devops-final-project:latest
+              docker run -d -p 3000:3000 brycekt4384/devops-final-project:latest
               EOF
  
   tags = {
