@@ -2,9 +2,9 @@ name: Final Project CI/CD
 
 on:
   push:
-    branches: ["main", "FixAWS"]
+    branches: ["main"]
   pull_request:
-    branches: ["main", "FixAWS"]
+    branches: ["main"]
     types: [closed]
 jobs:
   test-deploy:
