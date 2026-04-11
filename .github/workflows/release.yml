@@ -1,6 +1,7 @@
 name: Terraform Release
 
 on:
+  workflow_dispatch:
   workflow_run:
     workflows: ["Final Project CI/CD"]
     types:
